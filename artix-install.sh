@@ -37,7 +37,7 @@ echo "
             user                    - $username
             hostname                - $hostname
             kernel                  - $kernel
-			init					- $init
+			init					- $init"
 if [ "$system" = EFI ]
 then
 echo "            (EFI) bootloader name   - $efiboot"
