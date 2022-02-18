@@ -36,7 +36,8 @@ echo "
             timezone                - $timezone
             user                    - $username
             hostname                - $hostname
-            kernel                  - $kernel"
+            kernel                  - $kernel
+			init					- $init
 if [ "$system" = EFI ]
 then
 echo "            (EFI) bootloader name   - $efiboot"
@@ -323,6 +324,44 @@ read -p "         Your choice: " kernelans
     esac
 }
 
+answerinit(){
+clear
+answer='
+        Choose init system
+
+            1) - dinit
+            2) - runit
+            3) - openrc
+			4) - s6
+			5) - suite66
+            any) - exit without save
+
+'
+printgraph
+printanswer
+read -p "         Your choice: " initans
+    case $initans in
+    1)
+    init=dinit
+    ;;
+    2)
+    init=runit
+    ;;
+    3)
+    init=openrc
+    ;;
+	4)
+	init=s6
+	;;
+	5)
+	init=suite66
+	;;
+    *)
+    choicexit
+    ;;
+    esac
+}
+
 answersystemadd(){
     case $system in
     BIOS)
@@ -505,7 +544,7 @@ answerpassroot(){
         do
         clear
         printanswer
-        arch-chroot /mnt passwd
+        artix-chroot /mnt passwd
         read -p "Did you enter the pass correctly (yes/no)? : " correct
         done
 }
@@ -516,13 +555,13 @@ answerpassuser(){
     answer="
        Type user password
     "
-    arch-chroot /mnt useradd -m -g users -G wheel -s /bin/bash $username
+    artix-chroot /mnt useradd -m -g users -G wheel -s /bin/bash $username
     echo "%wheel ALL=(ALL) ALL" >> /mnt/etc/sudoers
     until [ $correct = yes ]
         do
         clear
         printanswer
-        arch-chroot /mnt passwd $username
+        artix-chroot /mnt passwd $username
         read -p "Did you enter the pass correctly (yes/no)? : " correct
         done
 }
@@ -533,7 +572,7 @@ answerending(){
        Do you want reboot or...
 
          1)Enter livecd
-         2)Enter arch-chroot (reboot after exit)
+         2)Enter artix-chroot (reboot after exit)
          any) - reboot
     '
     printanswer
@@ -545,7 +584,7 @@ answerending(){
         ;;
         2)
         clear
-        arch-chroot /mnt
+        artix-chroot /mnt
         umount -R /mnt
         reboot
         ;;
@@ -571,6 +610,7 @@ answertimezone
 answeruser
 answerhost
 answerkernel
+answerinit
 answersystemadd
 answernetwork
 answerdesktop
@@ -597,21 +637,21 @@ else
 	mount /dev/$bootpart /mnt/boot
 fi
 
-pacstrap /mnt base base-devel networkmanager $kernel $kernel-headers linux-firmware grub os-prober efibootmgr neovim
+basestrap /mnt base base-devel $init elogind-$init networkmanager networkmanager-$init $kernel $kernel-headers linux-firmware grub os-prober efibootmgr neovim
 
 if [ -n "$desktop" ]
 then
-	pacstrap /mnt $desktop
+	basestrap /mnt $desktop
 fi
 
 if [ -n "$display" ]
 then
-	pacstrap /mnt $display
+	basestrap /mnt $display
 fi
 
 if [ -n "$extrapackages" ]
 then
-	pacstrap /mnt $extrapackages
+	basestrap /mnt $extrapackages
 fi
 
 echo $hostname > /mnt/etc/hostname
@@ -622,29 +662,29 @@ echo LANG="$locale.UTF-8" > /mnt/etc/locale.conf
 echo "LC_COLLATE="C"" >> /mnt/etc/locale.conf
 
 echo $locale.UTF-8 UTF-8 >> /mnt/etc/locale.gen
-arch-chroot /mnt locale-gen
+artix-chroot /mnt locale-gen
 
-genfstab -U /mnt >> /mnt/etc/fstab
+fstabgen -U /mnt >> /mnt/etc/fstab
 
-arch-chroot /mnt ln -sf /usr/share/zoneinfo/$timezone /etc/localtime
-arch-chroot /mnt hwclock --systohc
+artix-chroot /mnt ln -sf /usr/share/zoneinfo/$timezone /etc/localtime
+artix-chroot /mnt hwclock --systohc
 
 case $system in
 BIOS)
-	arch-chroot /mnt grub-install --recheck $biosdisk
-	arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg
+	artix-chroot /mnt grub-install --recheck $biosdisk
+	artix-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg
 ;;
 EFI)
-	arch-chroot /mnt grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=$efiboot
-	arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg
+	artix-chroot /mnt grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=$efiboot
+	artix-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg
 ;;
 esac
     
-arch-chroot /mnt systemctl enable --now NetworkManager
+artix-chroot /mnt systemctl enable --now NetworkManager
 
 if [ -n $display ]
 then
-	arch-chroot /mnt systemctl enable $display
+	artix-chroot /mnt systemctl enable $display
 fi
 
 answerpassroot
