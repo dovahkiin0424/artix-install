@@ -698,7 +698,7 @@ BIOS)
 	artix-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg
 ;;
 EFI)
-	artix-chroot /mnt grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=$efiboot
+	artix-chroot /mnt grub-install
 	artix-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg
 ;;
 esac
