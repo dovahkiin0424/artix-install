@@ -6,7 +6,7 @@ RED=$(tput setaf 1)
 WHITE=$(tput sgr0)
 
 clear
-echo "${GREEN}Welcome to my arch install script!${WHITE}"
+echo "${GREEN}Welcome to my artix install script!${WHITE}"
 
 system=$(cat /sys/firmware/efi/fw_platform_size)
 if [ "$system" = 64 ]
@@ -105,7 +105,7 @@ answer="
 
             Do you want to change the partitions?
             s) - skip
-            yes) - open gparted
+            yes) - open cfdisk
             any) - exit without change
 
 "
@@ -221,7 +221,7 @@ answer='
         Choose timezone (example Europe/Budapest)
 
             s) - skip
-            d) - default (default Europe/London)
+            d) - default (Europe/London)
             empty) - exit without save
 
 '
@@ -427,7 +427,12 @@ clear
 answer='
         Choose a desktop environment
 
-            (gnome, plasma, lxqt, lxde or another)
+			c) - cinnamon
+			p) - plasma
+			g) - gnome
+			x) - xfce
+			i) - i3
+			b) - bspwm
             s) - skip
             sk) if you already print, but want delete
             empty) - exit with no changes
@@ -443,6 +448,24 @@ read -p "         Your choice: " desktopans
     case $desktopans in
     s)
     ;;
+	c)
+	desktop=cinnamon
+	;;
+	p)
+	desktop=plasma
+	;;
+	g)
+	desktop=gnome gnome-extra
+	;;
+	x)
+	desktop=xfce4 xfce4-goodies
+	;;
+	i)
+	desktop=xorg-server xorg-xinit rofi alacritty i3-gaps i3blocks
+	;;
+	b)
+	desktop=xorg-server xorg-xinit rofi alacritty bspwm sxhkd
+	;;
     sk)
     desktop=
     ;;
@@ -646,7 +669,7 @@ fi
 
 if [ -n "$display" ]
 then
-	basestrap /mnt $display
+	basestrap /mnt $display $display-$init
 fi
 
 if [ -n "$extrapackages" ]
@@ -679,12 +702,31 @@ EFI)
 	artix-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg
 ;;
 esac
-    
-artix-chroot /mnt systemctl enable --now NetworkManager
 
-if [ -n $display ]
-then
-	artix-chroot /mnt systemctl enable $display
+if [[ $init == dinit ]]; then
+	artix-chroot /mnt dinitctl enable NetworkManager
+elif [[ $init == runit ]]; then
+	artix-chroot /mnt ln -s /etc/runit/sv/NetworkManager /run/runit/service
+elif [[ $init == openrc ]]; then
+	artix-chroot /mnt rc-update add NetworkManager
+elif [[ $init == s6 ]]; then
+	artix-chroot /mnt s6-rc-bundle-update -c /etc/s6/rc/compiled add default NetworkManager
+elif [[ $init == suite66 ]]; then
+	artix-chroot /mnt 66-enable NetworkManager
+fi
+
+if [ -n $display ]; then	
+	if [[ $init == dinit ]]; then
+		artix-chroot /mnt dinitctl enable $display
+	elif [[ $init == runit ]]; then
+		artix-chroot /mnt ln -s /etc/runit/sv/$display /run/runit/service
+	elif [[ $init == openrc ]]; then
+		artix-chroot /mnt rc-update add $display
+	elif [[ $init == s6 ]]; then
+		artix-chroot /mnt s6-rc-bundle-update -c /etc/s6/rc/compiled add default $display
+	elif [[ $init == suite66 ]]; then
+		artix-chroot /mnt 66-enable $display
+	fi
 fi
 
 answerpassroot
