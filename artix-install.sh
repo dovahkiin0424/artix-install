@@ -426,13 +426,7 @@ answerdesktop(){
 clear
 answer='
         Choose a desktop environment
-
-			c) - cinnamon
-			p) - plasma
-			g) - gnome
-			x) - xfce
-			i) - i3
-			b) - bspwm
+			(type neccesarry packages for the WM/DE you want)
             s) - skip
             sk) if you already print, but want delete
             empty) - exit with no changes
@@ -571,6 +565,96 @@ answerpassuser(){
         done
 }
 
+answerarchrepo(){
+clear
+answer='
+       Do you want to install the traditional arch repositories?
+
+	   		y) - yes
+			n) - no
+            s) - skip
+            empty) - exit with no changes
+
+'
+printgraph
+printanswer
+read -p "         Your choice: " archrepoans
+    if [ -z $archrepoans ]
+    then
+    choicexit
+    fi
+    case $archrepoans in
+    s)
+    ;;
+	y)
+	archrepo=yes
+	;;
+	n)
+	archrepo=no
+	;;
+    esac
+}
+
+answerparu(){
+clear
+answer='
+	Do you want to install paru (AUR)?
+
+	   		y) - yes
+			n) - no
+            s) - skip
+            empty) - exit with no changes
+
+'
+printgraph
+printanswer
+read -p "         Your choice: " paruans
+    if [ -z $paruans ]
+    then
+    choicexit
+    fi
+    case $paruans in
+    s)
+    ;;
+	y)
+	paru=yes
+	;;
+	n)
+	paru=no
+	;;    
+	esac
+}
+
+answerblackarchrepo(){
+clear
+answer='
+       Do you want to install the blackarch repository?
+
+	   		y) - yes
+			n) - no
+            s) - skip
+            empty) - exit with no changes
+
+'
+printgraph
+printanswer
+read -p "         Your choice: " blackarchans
+    if [ -z $blackarchans ]
+    then
+    choicexit
+    fi
+    case $blackarchans in
+    s)
+    ;;
+	y)
+	archrepo=yes
+	;;
+	n)
+	archrepo=no
+	;;
+    esac
+}
+
 answerending(){
     clear
     answer='
@@ -621,6 +705,9 @@ answernetwork
 answerdesktop
 answerdisplay
 answerextrapackages
+answerarchrepo
+answerparu
+answerblackarchrepo
 answerready
 done
 
@@ -713,6 +800,11 @@ fi
 
 answerpassroot
 answerpassuser
+
+if [[ $archrepo == yes ]]; then
+	artix-chroot /mnt artix-archlinux-support
+fi
+
 answerending
 
 fi
