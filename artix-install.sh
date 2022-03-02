@@ -75,7 +75,7 @@ answer="
 
             Do you want change to another?
             s) - skip
-            yes) - EFI > BIOS or vice versa
+            yes) - EFI > BIOS or vica versa
             any) - exit without change
 
 "
@@ -393,7 +393,7 @@ answersystemadd(){
     EFI)
     clear
     answer='
-        Choos bootloader
+        Choose bootloader
 
             s) - skip
             d) - default (grub)
@@ -448,24 +448,6 @@ read -p "         Your choice: " desktopans
     case $desktopans in
     s)
     ;;
-	c)
-	desktop=cinnamon
-	;;
-	p)
-	desktop=plasma
-	;;
-	g)
-	desktop=gnome gnome-extra
-	;;
-	x)
-	desktop=xfce4 xfce4-goodies
-	;;
-	i)
-	desktop=xorg-server xorg-xinit rofi alacritty i3-gaps i3blocks
-	;;
-	b)
-	desktop=xorg-server xorg-xinit rofi alacritty bspwm sxhkd
-	;;
     sk)
     desktop=
     ;;
@@ -647,7 +629,7 @@ then
 
 mkfs.ext4 /dev/$rootpart
 mount /dev/$rootpart /mnt
-
+fi
 
 if [ $system = EFI ]
 then
