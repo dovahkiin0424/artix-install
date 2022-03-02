@@ -803,6 +803,20 @@ answerpassuser
 
 if [[ $archrepo == yes ]]; then
 	artix-chroot /mnt artix-archlinux-support
+	pacman -S wget
+	wget https://raw.githubusercontent.com/dovahkiin0424/artix-install/main/pacman.conf -O /mnt/etc/pacman.conf
+fi
+
+if [[ $paru == yes ]]; then
+	git clone https://aur.archlinux.org/paru.git
+	cd paru
+	artix-chroot /mnt makepkg -si
+fi
+
+if [[ $blackarch == yes ]]; then
+	curl -O https://blackarch.org/strap.sh
+	chmod +x strap.sh
+	artix-chroot /mnt ./strap.sh
 fi
 
 answerending
