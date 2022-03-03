@@ -647,10 +647,10 @@ read -p "         Your choice: " blackarchans
     s)
     ;;
 	y)
-	archrepo=yes
+	blackarchrepo=yes
 	;;
 	n)
-	archrepo=no
+	blackarchrepo=no
 	;;
     esac
 }
@@ -802,18 +802,19 @@ answerpassroot
 answerpassuser
 
 if [[ $archrepo == yes ]]; then
-	artix-chroot /mnt artix-archlinux-support
+	artix-chroot /mnt pacman -S artix-archlinux-support
 	pacman -S wget
 	wget https://raw.githubusercontent.com/dovahkiin0424/artix-install/main/pacman.conf -O /mnt/etc/pacman.conf
+	artix-chroot /mnt pacman-key --populate archlinux
 fi
 
 if [[ $paru == yes ]]; then
-	git clone https://aur.archlinux.org/paru.git
-	cd paru
+	artix-chroot /mnt git clone https://aur.archlinux.org/paru.git
+	artix-chroot /mnt cd paru
 	artix-chroot /mnt makepkg -si
 fi
 
-if [[ $blackarch == yes ]]; then
+if [[ $blackarchrepo == yes ]]; then
 	curl -O https://blackarch.org/strap.sh
 	chmod +x strap.sh
 	artix-chroot /mnt ./strap.sh
